@@ -33,7 +33,7 @@ module.exports = class VaryEE extends EventEmitter{
           var hash = hasher.digest();
           if(hashes[file] != hash){
             hashes[file] = hash;
-            this.emit('change', file);
+            this.emit('vary', file);
           }
         });
     }

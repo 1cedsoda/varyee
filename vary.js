@@ -5,7 +5,7 @@ const path = require('path');
 
 var hashes = {};
 
-module.exports = class VaryWatcher extends EventEmitter{
+module.exports = class VaryEE extends EventEmitter{
   constructor(automatic) {
     super();
     if(automatic === undefined) {automatic = true}

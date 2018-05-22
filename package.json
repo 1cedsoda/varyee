@@ -1,15 +1,15 @@
 {
-  "name": "vary",
+  "name": "varyee",
   "version": "1.0.0",
   "engines": "10.1.0",
   "description": "Automated events for changed files",
-  "main": "vary.js",
+  "main": "varyee.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/phyyyl/vary.git"
+    "url": "git+https://github.com/phyyyl/varyee.git"
   },
   "keywords": [
     "event",
@@ -20,9 +20,9 @@
   "author": "phyyyl",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/phyyyl/vary/issues"
+    "url": "https://github.com/phyyyl/varyee/issues"
   },
-  "homepage": "https://github.com/phyyyl/vary#readme",
+  "homepage": "https://github.com/phyyyl/varyee#readme",
   "dependencies": {
     "xxhash": "^0.2.4"
   }

@@ -11,15 +11,13 @@ module.exports = class VaryEE extends EventEmitter{
     if(automatic === undefined) {automatic = true}
     if(automatic) {setInterval(this.vary, 1000);}
   }
-
+  
   addFile(file) {
     hashes[file] = "";
-    console.log("added " + file);
   }
 
   removeFile(file) {
     delete hashes[file];
-    console.log("removed " + file);
   }
 
   vary() {

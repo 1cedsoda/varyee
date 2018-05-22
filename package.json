@@ -1,6 +1,6 @@
 {
   "name": "varyee",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "engines": "10.1.0",
   "description": "Automated events for changed files",
   "main": "varyee.js",

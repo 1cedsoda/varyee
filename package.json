@@ -1,6 +1,7 @@
 {
   "name": "vary",
   "version": "1.0.0",
+  "engines": "10.1.0",
   "description": "Automated events for changed files",
   "main": "vary.js",
   "scripts": {

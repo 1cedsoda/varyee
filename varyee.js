@@ -84,7 +84,9 @@ class DirectoryObserver extends EventEmitter {
     this.vary = this.hashtree(this.dir)
     var newchanges = this.compare(this.base, this.vary, "")
     if (!(JSON.stringify(newchanges) === JSON.stringify(this.changes))) {
-      this.emit('vary', newchanges)
+      if (!(JSON.stringify(newchanges) === JSON.stringify({addFile:[],addDir:[],delFile:[],delDir:[],edit:[]}))) {
+        this.emit('vary', newchanges)
+      }
     }
     this.changes = newchanges
   }

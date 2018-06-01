@@ -103,14 +103,14 @@ class DirectoryObserver extends EventEmitter {
       var isDir = typeof base[key] === "object" // object is a foler ?
       if (!(key in vary)) {
         if (isDir) {
-          protocol.delDir.push(path.slice(1) + "/" + key)
+          protocol.delDir.push((path + "/" + key).slice(1))
         } else {
-          protocol.delFile.push(path.slice(1) + "/" + key)
+          protocol.delFile.push((path + "/" + key).slice(1))
         }
       } else {
         //directory wasnt removed? Maybe files init! -> recursion
         if (isDir) {
-          var subprotocol = this.compare(base[key], vary[key], path.slice(1) + "/" + key) //recursion into subsirectory
+          var subprotocol = this.compare(base[key], vary[key], (path + "/" + key).slice(1)) //recursion into subsirectory
           protocol = this.mergeProtocols(protocol, subprotocol)
         }
       }
@@ -121,16 +121,16 @@ class DirectoryObserver extends EventEmitter {
       var isDir = typeof vary[key] === "object" // object is a foler ?
       if (!(key in base)) {
         if (isDir) {
-          protocol.addDir.push(path.slice(1) + "/" + key)
-          var subprotocol = this.compare(base[key], vary[key], path.slice(1) + "/" + key) //recursion into subsirectory
+          protocol.addDir.push((path + "/" + key).slice(1))
+          var subprotocol = this.compare(base[key], vary[key], (path + "/" + key).slice(1)) //recursion into subsirectory
           protocol = this.mergeProtocols(protocol, subprotocol)
         } else {
-          protocol.addFile.push(path.slice(1) + "/" + key)
+          protocol.addFile.push((path + "/" + key).slice(1))
         }
       } else {
         //file is not vary ... but maybe edited?
         if (!isDir && base[key] != vary[key]) {
-          protocol.edit.push(path.slice(1) + "/" + key)
+          protocol.edit.push((path + "/" + key).slice(1))
         }
       }
     }

@@ -48,7 +48,7 @@ class DirectoryObserver extends EventEmitter {
     this.dir = directory
     this.base = this.hashtree(this.dir)
     this.vary = this.base
-    this.changes = this.compare(this.base, this.vary)
+    this.changes = this.compare(this.base, this.vary, "")
     if (interval === undefined) { interval = 1000 }
     if (interval != 0 && !(interval == false)) {
       setInterval(this.check.bind(this), interval)
@@ -82,14 +82,14 @@ class DirectoryObserver extends EventEmitter {
 
   check() {
     this.vary = this.hashtree(this.dir)
-    var newchanges = this.compare(this.base, this.vary)
+    var newchanges = this.compare(this.base, this.vary, "")
     if (!(JSON.stringify(newchanges) === JSON.stringify(this.changes))) {
       this.emit('vary', newchanges)
     }
     this.changes = newchanges
   }
 
-  compare(base, vary) {
+  compare(base, vary, path) {
     var protocol = {
       addFile: [],
       addDir: [],
@@ -103,14 +103,14 @@ class DirectoryObserver extends EventEmitter {
       var isDir = typeof base[key] === "object" // object is a foler ?
       if (!(key in vary)) {
         if (isDir) {
-          protocol.delDir.push(key)
+          protocol.delDir.push(path.slice(1) + "/" + key)
         } else {
-          protocol.delFile.push(key)
+          protocol.delFile.push(path.slice(1) + "/" + key)
         }
       } else {
         //directory wasnt removed? Maybe files init! -> recursion
         if (isDir) {
-          var subprotocol = this.compare(base[key], vary[key]) //recursion into subsirectory
+          var subprotocol = this.compare(base[key], vary[key], path.slice(1) + "/" + key) //recursion into subsirectory
           protocol = this.mergeProtocols(protocol, subprotocol)
         }
       }
@@ -121,16 +121,16 @@ class DirectoryObserver extends EventEmitter {
       var isDir = typeof vary[key] === "object" // object is a foler ?
       if (!(key in base)) {
         if (isDir) {
-          protocol.addDir.push(key)
-          var subprotocol = this.compare(base[key], vary[key]) //recursion into subsirectory
+          protocol.addDir.push(path.slice(1) + "/" + key)
+          var subprotocol = this.compare(base[key], vary[key], path.slice(1) + "/" + key) //recursion into subsirectory
           protocol = this.mergeProtocols(protocol, subprotocol)
         } else {
-          protocol.addFile.push(key)
+          protocol.addFile.push(path.slice(1) + "/" + key)
         }
       } else {
         //file is not vary ... but maybe edited?
         if (!isDir && base[key] != vary[key]) {
-          protocol.edit.push(key)
+          protocol.edit.push(path.slice(1) + "/" + key)
         }
       }
     }

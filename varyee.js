@@ -75,9 +75,11 @@ class DirectoryObserver extends EventEmitter {
     return folder
   }
 
-  checkpoint() { //update this.base
-    this.base = this.hashtree(this.dir)
+  checkpoint(tree) { //update this.base
+    if(tree === undefined) this.base = this.hashtree(this.dir)
+    else this.base = tree
     this.vary = this.base
+
   }
 
   check() {

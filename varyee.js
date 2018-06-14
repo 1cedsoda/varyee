@@ -76,21 +76,26 @@ class DirectoryObserver extends EventEmitter {
   }
 
   checkpoint(tree) { //update this.base
-    if(tree === undefined) this.base = this.hashtree(this.dir)
-    else this.base = tree
+    if(tree === undefined) {this.base = this.hashtree(this.dir)}
+    else {this.base = tree}
     this.vary = this.base
 
   }
 
-  check() {
+  check(emit) {
+    if(emit === undefined) {emit = true}
+    else {emit = false}
     this.vary = this.hashtree(this.dir)
     var newchanges = this.compare(this.base, this.vary, "")
     if (!(JSON.stringify(newchanges) === JSON.stringify(this.changes))) {
       if (!(JSON.stringify(newchanges) === JSON.stringify({addFile:[],addDir:[],delFile:[],delDir:[],edit:[]}))) {
-        this.emit('vary', newchanges)
+        this.changes = newchanges
+        if(emit) {this.emit('vary', newchanges)}
+        else {return true}
+      } else {
+        if(!emit) {return false}
       }
     }
-    this.changes = newchanges
   }
 
   compare(base, vary, path) {
@@ -114,7 +119,7 @@ class DirectoryObserver extends EventEmitter {
       } else {
         //directory wasnt removed? Maybe files init! -> recursion
         if (isDir) {
-          var subprotocol = this.compare(base[key], vary[key], (path + "/" + key).slice(1)) //recursion into subsirectory
+          var subprotocol = this.compare(base[key], vary[key], (path + "/" + key)) //recursion into subsirectory
           protocol = this.mergeProtocols(protocol, subprotocol)
         }
       }
@@ -126,7 +131,7 @@ class DirectoryObserver extends EventEmitter {
       if (!(key in base)) {
         if (isDir) {
           protocol.addDir.push((path + "/" + key).slice(1))
-          var subprotocol = this.compare(base[key], vary[key], (path + "/" + key).slice(1)) //recursion into subsirectory
+          var subprotocol = this.compare(base[key], vary[key], (path + "/" + key)) //recursion into subsirectory
           protocol = this.mergeProtocols(protocol, subprotocol)
         } else {
           protocol.addFile.push((path + "/" + key).slice(1))

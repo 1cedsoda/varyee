@@ -7,37 +7,38 @@ class FileObserver extends EventEmitter {
   constructor(interval) {
     super()
     this.hashes = {}
-    if (interval === undefined) { interval = 1000 }
-    if (interval != 0 && !(interval == false)) {
-      setInterval(this.check.bind(this), interval)
-    }
+    if (interval === undefined) interval = 1000
+    if (interval != 0 && !(interval == false)) setInterval(this.check.bind(this), interval)
   }
 
-  addFile(file) {
-    this.hashes[file] = ""
+  addFile(file, alias) {
+    this.hashes[file] = {
+      'hash': '',
+      'alias': alias.toString()
+    }
   }
 
   removeFile(file) {
     delete this.hashes[file]
   }
 
+  removeFileByAlias(alias) {
+    for(var file in this.hashes) if(file['alias']==alias) delete this.hashes[file]
+  }
+
   check() {
     for (var file in this.hashes) {
       var hasher = new XXHash(0x1C3D50D4)
       fs.createReadStream(file)
-        .on('data', function (data) {
-          hasher.update(data)
-        })
-        .on('end', (function () {
-            var hash = hasher.digest()
-            if (this.hashes[file] != hash) {
-              if (this.hashes[file] != "") {
-                this.emit('vary', file)
-              }
-              this.hashes[file] = hash
-            }
-          })
-          .bind(this))
+      .on('data', function (data) {hasher.update(data)})
+      .on('end', (function () {
+        var hash = hasher.digest()
+        if (this.hashes[file] != hash) {
+          if (this.hashes[file] != "") this.emit('vary', file)
+          this.hashes[file] = hash
+        }
+      })
+      .bind(this))
     }
   }
 }
@@ -69,32 +70,28 @@ class DirectoryObserver extends EventEmitter {
           folder[objects[i]] = hash
         }
       }
-    } catch (e) {
-      this.emit('error', e)
-    }
+    } catch (e) this.emit('error', e)
     return folder
   }
 
   checkpoint(tree) { //update this.base
-    if(tree === undefined) {this.base = this.hashtree(this.dir)}
-    else {this.base = tree}
+    if(tree === undefined) this.base = this.hashtree(this.dir)
+    else this.base = tree
     this.vary = this.base
 
   }
 
   check(emit) {
-    if(emit === undefined) {emit = true}
-    else {emit = false}
+    if(emit === undefined) emit = true
+    else emit = false
     this.vary = this.hashtree(this.dir)
     var newchanges = this.compare(this.base, this.vary, "")
     if (!(JSON.stringify(newchanges) === JSON.stringify(this.changes))) {
       if (!(JSON.stringify(newchanges) === JSON.stringify({addFile:[],addDir:[],delFile:[],delDir:[],edit:[]}))) {
         this.changes = newchanges
-        if(emit) {this.emit('vary', newchanges)}
-        else {return true}
-      } else {
-        if(!emit) {return false}
-      }
+        if(emit) this.emit('vary', newchanges)
+        else return true
+      } else {if(!emit) return false}
     }
   }
 
@@ -111,11 +108,8 @@ class DirectoryObserver extends EventEmitter {
     for (var key in base) {
       var isDir = typeof base[key] === "object" // object is a foler ?
       if (!(key in vary)) {
-        if (isDir) {
-          protocol.delDir.push((path + "/" + key).slice(1))
-        } else {
-          protocol.delFile.push((path + "/" + key).slice(1))
-        }
+        if (isDir) protocol.delDir.push((path + "/" + key).slice(1))
+        else protocol.delFile.push((path + "/" + key).slice(1))
       } else {
         //directory wasnt removed? Maybe files init! -> recursion
         if (isDir) {
@@ -133,9 +127,7 @@ class DirectoryObserver extends EventEmitter {
           protocol.addDir.push((path + "/" + key).slice(1))
           var subprotocol = this.compare(base[key], vary[key], (path + "/" + key)) //recursion into subsirectory
           protocol = this.mergeProtocols(protocol, subprotocol)
-        } else {
-          protocol.addFile.push((path + "/" + key).slice(1))
-        }
+        } else protocol.addFile.push((path + "/" + key).slice(1))
       } else {
         //file is not vary ... but maybe edited?
         if (!isDir && base[key] != vary[key]) {
